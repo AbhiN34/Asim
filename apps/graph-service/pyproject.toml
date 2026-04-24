@@ -1,0 +1,16 @@
+[project]
+name = "graph-service"
+version = "0.1.0"
+description = "Asim identity-graph service powered by Graphiti + Neo4j"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "pydantic>=2.11.0",
+    "graphiti-core[anthropic]==0.28.2",
+    "python-dotenv>=1.0.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
