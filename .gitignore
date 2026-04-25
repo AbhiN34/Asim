@@ -1,22 +1,26 @@
-# Dependencies
-node_modules/
-.venv/
-__pycache__/
-
-# Environment
+# Secrets
 .env
 .env.local
+.env.*.local
 
-# Build output
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node
+node_modules/
 .next/
 dist/
 
-# IDE
-.idea/
-.vscode/
-
-# OS
+# macOS
 .DS_Store
 
-# Conductor
-.context/
+# IDE
+.vscode/
+.idea/
+*.swp
