@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { submitCandidate } from '@/actions/submit-candidate'
 import { StepIndicator } from '@/components/intake/StepIndicator'
 import { Step1BasicInfo } from '@/components/intake/Step1BasicInfo'
@@ -87,7 +88,12 @@ export default function IntakePage() {
     <main className="min-h-screen bg-gray-50 py-12">
       <div className="max-w-2xl mx-auto px-4">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold text-center mb-6">Candidate Profile</h1>
+          <div className="mb-4">
+            <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+              ← Dashboard
+            </Link>
+          </div>
+          <h1 className="text-2xl font-bold text-center mb-6">New Candidate Graph</h1>
           <StepIndicator current={step} labels={STEPS} />
         </div>
 

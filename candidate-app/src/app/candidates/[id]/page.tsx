@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma'
 
@@ -9,6 +10,9 @@ export default async function CandidatePage({ params }: { params: Promise<{ id: 
 
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-4">
+      <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+        ← Dashboard
+      </Link>
       <h1 className="text-3xl font-bold">{candidate.name}</h1>
       {candidate.email && <p className="text-gray-500">{candidate.email}</p>}
       {candidate.summary && <p className="text-gray-700">{candidate.summary}</p>}
