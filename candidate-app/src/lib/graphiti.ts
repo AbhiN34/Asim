@@ -36,11 +36,18 @@ export async function ingestText(
   groupId: string,
   sourceDescription: string,
 ): Promise<{ ok: boolean; name: string }> {
-  const res = await fetch(`${base()}/ingest`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, group_id: groupId, source_description: sourceDescription }),
-  })
+  let res: Response
+  try {
+    res = await fetch(`${base()}/ingest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, group_id: groupId, source_description: sourceDescription }),
+    })
+  } catch {
+    throw new Error(
+      `Cannot reach the graph service at ${base()}. Make sure the backend is running: cd asim-mvp && uvicorn main:app --reload`,
+    )
+  }
   if (!res.ok) {
     const body = await res.text()
     throw new Error(`Graphiti ingest failed (${res.status}): ${body}`)
