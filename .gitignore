@@ -1,6 +1,5 @@
-# Secrets
+# Secrets — real credentials only. .env.local is a tracked template.
 .env
-.env.local
 .env.*.local
 
 # Python
