@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,10 +20,13 @@ USER = "justin"
 
 class IngestBody(BaseModel):
     text: str
+    group_id: str = USER
+    source_description: str = "user input"
 
 
 class QueryBody(BaseModel):
     question: str
+    group_id: str = USER
 
 
 @asynccontextmanager
@@ -68,9 +71,9 @@ async def ingest(body: IngestBody):
             name=name,
             episode_body=body.text,
             source=EpisodeType.text,
-            source_description="user input",
+            source_description=body.source_description,
             reference_time=datetime.now(timezone.utc),
-            group_id=USER,
+            group_id=body.group_id,
         )
     except Exception as e:
         return JSONResponse(status_code=500, content={"ok": False, "error": str(e)})
@@ -78,7 +81,7 @@ async def ingest(body: IngestBody):
 
 
 @app.get("/graph")
-async def graph():
+async def graph(group_id: str = Query(default=USER)):
     try:
         nodes, edges = [], []
         async with app.state.graphiti.driver.session() as session:
@@ -88,7 +91,7 @@ async def graph():
                 RETURN n.uuid AS id, n.name AS name, n.summary AS summary
                 LIMIT 200
                 """,
-                gid=USER,
+                gid=group_id,
             )
             async for rec in res:
                 nodes.append({
@@ -105,7 +108,7 @@ async def graph():
                        r.target_node_uuid AS target, r.fact AS fact, r.name AS name
                 LIMIT 500
                 """,
-                gid=USER,
+                gid=group_id,
             )
             async for rec in res:
                 edges.append({
@@ -115,6 +118,39 @@ async def graph():
                     "label": rec["fact"] or rec["name"] or "related",
                 })
         return {"nodes": nodes, "edges": edges}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
+
+
+@app.get("/graph/evidence/{edge_id}")
+async def graph_evidence(edge_id: str):
+    """
+    Returns the raw source episode(s) that caused this edge to be created.
+    Graphiti stores episode UUIDs on the RELATES_TO relationship under the
+    `episodes` property (list of strings). Adjust the property name below if
+    your graphiti-core version uses a different field (e.g. `episode_mentions`).
+    """
+    try:
+        episodes = []
+        async with app.state.graphiti.driver.session() as session:
+            res = await session.run(
+                """
+                MATCH ()-[r:RELATES_TO {uuid: $edge_id}]->()
+                WITH r
+                MATCH (ep:Episodic)
+                WHERE ep.uuid IN r.episodes
+                RETURN ep.content AS content,
+                       ep.source_description AS source_description
+                LIMIT 5
+                """,
+                edge_id=edge_id,
+            )
+            async for rec in res:
+                episodes.append({
+                    "content": rec["content"] or "",
+                    "source_description": rec["source_description"] or "",
+                })
+        return {"episodes": episodes}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 

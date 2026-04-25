@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Status values: "PROCESSING" | "READY" | "FAILED"
+// SQLite stores enums as TEXT; use these string literals throughout the app.
+model Candidate {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  name         String
+  email        String?
+  phone        String?
+  // One-paragraph summary extracted from the resume or written by the candidate
+  summary      String?
+
+  // Neo4j group_id for this candidate's isolated graph namespace
+  graphGroupId String   @unique
+
+  // "PROCESSING" while Graphiti ingestion runs; "READY" on success; "FAILED" on error
+  status       String   @default("PROCESSING")
+
+  @@map("candidates")
+}

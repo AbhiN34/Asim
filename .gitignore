@@ -16,6 +16,10 @@ node_modules/
 .next/
 dist/
 
+# SQLite
+**/*.db
+**/*.db-journal
+
 # macOS
 .DS_Store
 
